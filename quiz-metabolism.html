@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="loji">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ເກມທວນຄືນ - Metabolism + ຫາຍໃຈ / ຂາດ Oxy</title>
+
+<!-- ฟอนต์ลาวสวย ๆ จาก Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans Lao', 'Phetsarath OT', 'Saysettha OT', 'Lao Sans Pro', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    min-height: 100vh;
+    padding: 20px;
+    color: #222;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(90deg, #0f2027, #1a3a4a);
+    color: white;
+    padding: 24px 30px;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+  header p {
+    opacity: 0.9;
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .score-bar {
+    display: flex;
+    justify-content: space-between;
+    background: #e8f4f8;
+    padding: 15px 30px;
+    font-weight: 600;
+    font-size: 1.15rem;
+  }
+
+  .quiz-area { padding: 30px; }
+
+  .question {
+    font-size: 1.28rem;
+    font-weight: 500;
+    line-height: 1.7;
+    margin-bottom: 24px;
+    color: #0f2027;
+  }
+
+  .options button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border: 2px solid #ddd;
+    border-radius: 14px;
+    background: #fafafa;
+    font-size: 1.08rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    line-height: 1.5;
+  }
+  .options button:hover:not(:disabled) {
+    background: #e0f2fe;
+    border-color: #0f2027;
+    transform: translateX(6px);
+  }
+  .options button.correct {
+    background: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
+    font-weight: 500;
+  }
+  .options button.wrong {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+  .options button:disabled { cursor: default; }
+
+  .controls {
+    display: flex;
+    gap: 14px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+  }
+  .btn-next {
+    background: #0f2027;
+    color: white;
+  }
+  .btn-next:hover { background: #1a3a4a; }
+  .btn-refresh {
+    background: #f59e0b;
+    color: white;
+  }
+  .btn-refresh:hover { background: #d97706; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .result {
+    text-align: center;
+    padding: 50px 25px;
+  }
+  .result h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: #0f2027;
+  }
+  .hidden { display: none; }
+
+  .feedback {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 1.15rem;
+    font-weight: 500;
+    text-align: center;
+  }
+  .feedback.correct { background: #d1fae5; color: #065f46; }
+  .feedback.wrong { background: #fee2e2; color: #991b1b; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🧪 ເກມທວນຄືນ Pathophysiology</h1>
+    <p>Metabolism (Glucid • Lipid • Protid) + ຫາຍໃຈ / ຂາດ Oxy</p>
+    <p style="margin-top:6px; font-size:0.95rem; opacity:0.85;">
+      ຄຳຖາມສະລັບທຸກຄັ້ງ • ຕົວເລືອກສະລັບຕຳແໜ່ງ • ກົດລີເຟດເລີ່ມໃໝ່ໄດ້
+    </p>
+  </header>
+
+  <div class="score-bar">
+    <div>ຂໍ້ທີ <span id="current">1</span> / <span id="total">0</span></div>
+    <div>ຄະແນນ: <span id="score">0</span></div>
+  </div>
+
+  <div class="quiz-area" id="quizArea">
+    <div class="question" id="questionText"></div>
+    <div class="options" id="options"></div>
+    <div id="feedback" class="feedback hidden"></div>
+    <div class="controls">
+      <button class="btn btn-next" id="nextBtn" disabled>ຂໍ້ຕໍ່ໄປ →</button>
+      <button class="btn btn-refresh" id="refreshBtn">🔄 ລີເຟດຄຳຖາມໃໝ່</button>
+    </div>
+  </div>
+
+  <div class="result hidden" id="resultArea">
+    <h2>🎉 ເກມຈົບແລ້ວ!</h2>
+    <p style="font-size:1.4rem; margin:18px 0; font-weight:500;">
+      ເຈົ້າໄດ້ <span id="finalScore"></span> ຄະແນນ ຈາກ <span id="finalTotal"></span> ຂໍ້
+    </p>
+    <p id="percent" style="font-size:1.2rem; color:#555;"></p>
+    <br>
+    <button class="btn btn-refresh" onclick="startGame()">🔄 ຫຼີ້ນອີກເທື່ອ (ສຸ່ມໃໝ່)</button>
+  </div>
+</div>
+
+<script>
+const allQuestions = [
+  // ===== Metabolism =====
+  {
+    q: "ຮໍໂມນ Insulin ຫຼັ່ງມາຈາກສ່ວນໃດຂອງມ້າມ (Pancreas)?",
+    options: ["Cells α", "Cells β", "Cells δ", "Acinar cells"],
+    correct: 1
+  },
+  {
+    q: "ຮໍໂມນໃດເຮັດໜ້າທີ່ເພີ່ມລະດັບນ້ຳຕານໃນເລືອດໃນພາວະສຸກເສີນ ຫຼື ຕອນຫິວອາຫານ (Counter-regulatory Hormones)?",
+    options: [
+      "Insulin",
+      "Glucagon, Cortisol, Growth Hormone ແລະ Epinephrine",
+      "Albumin ແລະ Globulin",
+      "Thyroxine ແລະ Calcitonin"
+    ],
+    correct: 1
+  },
+  {
+    q: "ພະຍາດເບົາຫວານຊະນິດທີ 1 (Type 1 Diabetes Mellitus - T1DM) ເກີດຈາກຫຍັງ?",
+    options: [
+      "ພູມຄຸ້ມກັນທຳລາຍ Cells β ຂອງມ້າມ ເຮັດໃຫ້ຂາດ Insulin ຢ່າງສິ້ນເຊີງ",
+      "ພາວະດື້ Insulin ຮ່ວມกับการຫຼັ່ງ Insulin ຫຼຸດລົງ",
+      "ຕັບສ້າງນ້ຳຕານຫຼາຍເກີນໄປ",
+      "ການກິນອາຫານທີ່ມີນ້ຳຕານຫຼາຍເກີນໄປ"
+    ],
+    correct: 0
+  },
+  {
+    q: "ພະຍາດເບົາຫວານຊະນິດທີ 2 (Type 2 Diabetes Mellitus - T2DM) ມີລັກສະນະແນວໃດ?",
+    options: [
+      "ມັກພົບໃນເດັກ ແລະ ໄວລຸ້ນ",
+      "ເກີດຈາກພາວະດື້ Insulin ຮ່ວມກັບການຫຼັ່ງ Insulin ຫຼຸດລົງ",
+      "ຕ້ອງໄດ້ຮັບ Insulin ທົດແທນຕະຫຼອດຊີວິດເນື່ອງຈາກຂາດ Insulin ຢ່າງສິ້ນເຊີງ",
+      "ບໍ່ມີຄວາມກ່ຽວຂ້ອງກັບພັນທຸກຳ"
+    ],
+    correct: 1
+  },
+  {
+    q: "Lipoprotein ຊະນິດໃດຖືກຂະໜານນາມວ່າ \"ໄຂມັນບໍ່ດີ\"?",
+    options: ["Chylomicrons", "VLDL", "LDL", "HDL"],
+    correct: 2
+  },
+  {
+    q: "Lipoprotein ຊະນິດໃດເຮັດໜ້າທີ່ເກັບກຳ Cholesterol ສ່ວນເກີນກັບຄືນສູ່ຕັບເພື່ອກຳຈັດອອກ (ເອີ້ນວ່າ \"ໄຂມັນດີ\")?",
+    options: ["HDL", "LDL", "VLDL", "Chylomicrons"],
+    correct: 0
+  },
+  {
+    q: "ໃນຂະບວນການເກີດ Atherosclerosis, ເມັດເລືອດຂາວປະເພດໃດທີ່ເຄື່ອນຍ້າຍເຂົ້າຊັ້ນໃນຜະໜັງເສັ້ນເລືອດແລ້ວປ່ຽນເປັນ Macrophages ໄປກິນ Oxidized LDL?",
+    options: ["Lymphocytes", "Monocytes", "Neutrophils", "Basophils"],
+    correct: 1
+  },
+  {
+    q: "ໃນຄົນເຈັບທີ່ເປັນພະຍາດຕັບແຂງ, ຖ້າລະດັບ Albumin ຫຼຸດລົງຕ່ຳກວ່າປະມານເທົ່າໃດ ຈະເຮັດໃຫ້ນ້ຳຮົ່ວອອກໄປສະສົມເກີດອາການບວມ (Edema)?",
+    options: ["<1.0 g/dL", "<2.5 g/dL", "<4.5 g/dL", "<6.0 g/dL"],
+    correct: 1
+  },
+  {
+    q: "ເມື່ອກົດອາມິໂນຖືກສະຫຼາຍຈະປົດປ່ອຍກຸ່ມອາມິເນກາຍເປັນສານໃດເຊິ່ງເປັນສານພິດຕໍ່ລະບົບປະສາດສ່ວນກາງ?",
+    options: ["Uric Acid", "Ammonia (NH₃)", "Urea", "Glucose"],
+    correct: 1
+  },
+  {
+    q: "ການເຜົາຜານທາດທັງສາມ (Glucid, Lipid ແລະ Protid) ມີຈຸດເຊື່ອມຕໍ່ກັນທີ່ສຳຄັນຜ່ານສານໃດ?",
+    options: [
+      "Insulin ແລະ Glucagon",
+      "Albumin ແລະ Globulin",
+      "Acetyl-CoA",
+      "Uric Acid ແລະ Urea"
+    ],
+    correct: 2
+  },
+
+  // ===== ຫາຍໃຈ / ຂາດ Oxy =====
+  {
+    q: "ສາເຫດ ແລະ ກົນໄກເກີດພະຍາດ ຂາດ OXY ?",
+    options: [
+      "ຂາດ oxy ຍ້ອນວຸ້ນວາຍລະບາຍອາກາດ, ການປ່ຽນແປງຄວາມດັນ, ຍ້ອນບັນດາພະຍາດ ຂອງລະບົບຫາຍໃຈ, ຍ້ອນພະຍາດໝູນວຽນ ແລະ ເລືອດ, ການໝູນວຽນ - ຊຸກໂຊມການໝູນວຽນ, ຍ້ອນເລືອດ",
+      "ຂາດ oxy ຍ້ອນວຸ້ນວາຍລະບາຍອາກາດ, ການປ່ຽນແປງຄວາມດັນ, ຍ້ອນບັນດາພະຍາດ ກ້ອນເບົ້າ ກ້າມຊີ້ນ",
+      "ຂາດ oxy ຍ້ອນວຸ້ນວາຍລະບາຍອາກາດ ການດຳລົງຊີວິດ, ແອອັດ ຢູ່ທີ່ມືດບໍ່ມີ oxy",
+      "ຍ້ອນບັນດາພະຍາດ ຂອງລະບົບຫາຍໃຈ, ອາກາດເປັນພິດ"
+    ],
+    correct: 0
+  },
+  {
+    q: "ການຂາດ oxy ຍ້ອນບັນດາພະຍາດ ຂອງລະບົບຫາຍໃຈ?",
+    options: [
+      "ຊຳລຸດເສັ້ນທາງກືນອາຫານ, ພະຍາດປອດ, ພະຍາດ",
+      "ວັນນະໂລກປອດ, ອັກເສບປອດ, ກ້ອນເບົ້າປອດ",
+      "ຊຳລຸດສູນກາງຫາຍໃຈ, ພະຍາດປອດ, ພະຍາດຜົ້ງເອີກ",
+      "ບໍ່ລຸດສູນກາງຫາຍໃຈ, ພະຍາດປອດ, ພະຍາດຜົ້ງເອີກ"
+    ],
+    correct: 1
+  },
+  {
+    q: "ສະໝອງພາກສ່ວນໃດ ຄວບຄຸມການຫາຍໃຈ?",
+    options: [
+      "ກ້ານສະໝອງ ຄື pons ແລະ medulla",
+      "Hypothalamus, medulla",
+      "ກ້ານສະໝອງ ຄື pons",
+      "ກ້ານສະໝອງ ຄື pons, pituitary gland"
+    ],
+    correct: 0
+  },
+  {
+    q: "ອາການສະແດງອອກເມື່ອຂາດ oxy ມີອາການສະແດງອອກແນວໃດແດ່?",
+    options: [
+      "ເມື່ອຍລ້າ, ເຈັບຫົວ, ຄວາມຈຳບໍ່ດີ, ສະທ້ອນຊ້າ, ປວດຮາກ, ວຸ້ນວາຍການໄດ້ຍິນ, ການເບິ່ງ, ຫົວໃຈເຕັ້ນໄວ, ຫາຍໃຈຍາກ ໂຄມາ, ຊັກ ນຳໄປສູ່ການເສຍຊີວິດ",
+      "ເມື່ອຍລ້າ, ເຈັບຫົວ, ຄວາມຈຳບໍ່ດີ, ສະທ້ອນຊ້າ, ປວດຮາກ, ວຸ້ນວາຍການໄດ້ຍິນ, ການເບິ່ງ, ຫົວໃຈເຕັ້ນໄວ, ຫາຍໃຈຍາກ ໂຄມາ",
+      "ເມື່ອຍລ້າ, ເຈັບຫົວ, ຄວາມຈຳບໍ່ດີ, ສະທ້ອນຊ້າ, ປວດຮາກ, ວຸ້ນວາຍການໄດ້ຍິນ, ການເບິ່ງ, ຊັກ ນຳໄປສູ່ການເສຍຊີວິດ",
+      "ຄວາມຈຳບໍ່ດີ, ສະທ້ອນຊ້າ, ປວດຮາກ, ວຸ້ນວາຍການໄດ້ຍິນ, ການເບິ່ງ, ຫົວໃຈເຕັ້ນໄວ, ຫາຍໃຈຍາກ ໂຄມາ, ຊັກ ນຳໄປສູ່ການເສຍຊີວິດ"
+    ],
+    correct: 0
+  },
+  {
+    q: "ບັນດາປະຕິກິລິຍາປັບຕົວການທົດແທນ ຂອງຮ່າງກາຍເມື່ອຂາດ OXY ມີຄືແນວໃດ?",
+    options: [
+      "ເພີ່ມການປັບຕົວຂອງເລືອດ, ການປັບຕົວ ຂອງຮ່າງກາຍ, ການປັບຕົວ ຂອງລະບົບປະສາດ",
+      "ເພີ່ມການຫາຍໃຈ ແລະ ໄຫຼວຽນ, ການປັບຕົວຂອງເລືອດ, ການປັບຕົວ ຂອງຈັດຕັ້ງ, ການປັບຕົວ ຂອງລະບົບປະສາດ",
+      "ເພີ່ມການຫາຍໃຈ ແລະ ໄຫຼວຽນ, ການປັບຕົວຂອງເລືອດ, ການປັບຕົວ ຂອງກ້າມຊີ້ນ",
+      "ເພີ່ມການຫາຍໃຈ ແລະ ໄຫຼວຽນ, ການປັບຕົວ ຂອງລະບົບປະສາດອັດຕະໂນມັດ"
+    ],
+    correct: 1
+  }
+];
+
+let questions = [], currentIndex = 0, score = 0, answered = false;
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startGame() {
+  questions = shuffle([...allQuestions]);
+  currentIndex = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('quizArea').classList.remove('hidden');
+  document.getElementById('resultArea').classList.add('hidden');
+  document.getElementById('score').textContent = score;
+  document.getElementById('total').textContent = questions.length;
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[currentIndex];
+  document.getElementById('current').textContent = currentIndex + 1;
+  document.getElementById('questionText').textContent = (currentIndex + 1) + ". " + q.q;
+  document.getElementById('feedback').classList.add('hidden');
+  document.getElementById('nextBtn').disabled = true;
+
+  const opts = q.options.map((text, idx) => ({ text, originalIndex: idx }));
+  shuffle(opts);
+
+  const optionsDiv = document.getElementById('options');
+  optionsDiv.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.textContent = opt.text;
+    btn.dataset.original = opt.originalIndex;
+    btn.onclick = () => selectAnswer(btn, opt.originalIndex, q.correct);
+    optionsDiv.appendChild(btn);
+  });
+}
+
+function selectAnswer(btn, selected, correct) {
+  if (answered) return;
+  answered = true;
+  document.querySelectorAll('#options button').forEach(b => {
+    b.disabled = true;
+    if (parseInt(b.dataset.original) === correct) b.classList.add('correct');
+  });
+  const feedback = document.getElementById('feedback');
+  feedback.classList.remove('hidden', 'correct', 'wrong');
+  if (selected === correct) {
+    score++;
+    document.getElementById('score').textContent = score;
+    btn.classList.add('correct');
+    feedback.textContent = "✅ ຖືກຕ້ອງ!";
+    feedback.classList.add('correct');
+  } else {
+    btn.classList.add('wrong');
+    feedback.textContent = "❌ ຜິດ!";
+    feedback.classList.add('wrong');
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+document.getElementById('nextBtn').onclick = () => {
+  currentIndex++;
+  if (currentIndex < questions.length) {
+    showQuestion();
+  } else {
+    document.getElementById('quizArea').classList.add('hidden');
+    document.getElementById('resultArea').classList.remove('hidden');
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalTotal').textContent = questions.length;
+    document.getElementById('percent').textContent = `ເປີເຊັນ: ${Math.round((score / questions.length) * 100)}%`;
+  }
+};
+
+document.getElementById('refreshBtn').onclick = startGame;
+startGame();
+</script>
+</body>
+</html>
